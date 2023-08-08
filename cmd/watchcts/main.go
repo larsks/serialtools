@@ -25,7 +25,10 @@ func init() {
 }
 
 func runScript(script, portName, action string) error {
-	cmd := exec.Command(script, action, portName)
+	log.Printf("running script %s %s %s", script, portName, action)
+	cmd := exec.Command(script, portName, action)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		return fmt.Errorf("%s script failed: %w", action, err)
 	}
@@ -66,22 +69,22 @@ func realMain() int {
 		}
 
 		if status.CTS != ctsState {
+			var action, script string
 			ctsState = status.CTS
 			if ctsState {
 				log.Printf("CTS is high")
-				if upScript != "" {
-					if err := runScript(upScript, "up", portName); err != nil && !missingOkay {
-						log.Printf("ERROR: %s", err)
-						return 1
-					}
-				}
+				action = "up"
+				script = upScript
 			} else {
 				log.Printf("CTS is low")
-				if downScript != "" {
-					if err := runScript(downScript, "up", portName); err != nil && !missingOkay {
-						log.Printf("ERROR: %s", err)
-						return 1
-					}
+				action = "down"
+				script = downScript
+			}
+
+			if script != "" {
+				if err := runScript(script, portName, action); err != nil && !missingOkay {
+					log.Printf("ERROR: %s", err)
+					return 1
 				}
 			}
 
