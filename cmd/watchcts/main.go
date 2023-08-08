@@ -15,13 +15,15 @@ var (
 	upScript, downScript string
 	missingOkay          bool
 	checkInterval        time.Duration
+	cooldownInterval     time.Duration
 )
 
 func init() {
 	flag.StringVar(&upScript, "up", "", "run this script when CTS goes high")
 	flag.StringVar(&downScript, "down", "", "run this script when CTS goes low")
 	flag.BoolVar(&missingOkay, "missingok", false, "do not error out if script is missing")
-	flag.DurationVar(&checkInterval, "interval", 10*time.Second, "port check interval")
+	flag.DurationVar(&checkInterval, "checkInterval", 1*time.Second, "port check interval")
+	flag.DurationVar(&cooldownInterval, "cooldownInterval", 10*time.Second, "cool down interval")
 }
 
 func runScript(script, portName, action string) error {
@@ -88,8 +90,10 @@ func realMain() int {
 				}
 			}
 
-			time.Sleep(checkInterval)
+			time.Sleep(cooldownInterval)
 		}
+
+		time.Sleep(checkInterval)
 	}
 }
 
