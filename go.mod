@@ -1,4 +1,4 @@
-module waitforcts
+module serialtools
 
 go 1.20
 

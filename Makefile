@@ -1,12 +1,15 @@
 PROGRAMS = checkcts watchcts
 INSTALL = install
-LDFLAGS=-ldflags "-X=main.Version=$(VERSION) -X=main.Build=$(BUILD)"
 
+BUILD_DATE=$(shell date -Iseconds)
+BUILD_VERSION=$(shell git rev-parse --short HEAD)
+
+LDFLAGS=-ldflags "-X=serialtools/version.BuildVersion=$(BUILD_VERSION) -X=serialtools/version.BuildDate=$(BUILD_DATE)"
 
 prefix=/usr
 bindir=$(prefix)/bin
 
-%: cmd/%/main.go
+%: cmd/%/main.go version/version.go
 	go build $(LDFLAGS) -o $@ ./$(dir $<)
 
 all: $(PROGRAMS)

@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"os/exec"
+	"serialtools/version"
 	"time"
 
 	"go.bug.st/serial"
@@ -16,6 +17,7 @@ var (
 	missingOkay          bool
 	checkInterval        time.Duration
 	cooldownInterval     time.Duration
+	showVersion          bool
 )
 
 func init() {
@@ -24,6 +26,7 @@ func init() {
 	flag.BoolVar(&missingOkay, "missingok", false, "do not error out if script is missing")
 	flag.DurationVar(&checkInterval, "checkInterval", 1*time.Second, "port check interval")
 	flag.DurationVar(&cooldownInterval, "cooldownInterval", 10*time.Second, "cool down interval")
+	flag.BoolVar(&showVersion, "version", false, "show version and exit")
 }
 
 func runScript(script, portName, action string) error {
@@ -40,6 +43,11 @@ func runScript(script, portName, action string) error {
 
 func realMain() int {
 	flag.Parse()
+
+	if showVersion {
+		fmt.Println(version.GetVersionString())
+		return 0
+	}
 
 	if flag.NArg() < 1 {
 		panic(fmt.Errorf("you must provide a serial device"))

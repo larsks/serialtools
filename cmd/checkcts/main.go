@@ -1,13 +1,31 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"log"
 	"os"
+	"serialtools/version"
 
 	"go.bug.st/serial"
 )
 
+var (
+	showVersion bool
+)
+
+func init() {
+	flag.BoolVar(&showVersion, "version", false, "show version and exit")
+}
+
 func realMain() int {
+	flag.Parse()
+
+	if showVersion {
+		fmt.Println(version.GetVersionString())
+		return 0
+	}
+
 	if len(os.Args) <= 1 {
 		log.Printf("ERROR: you must provide a serial device")
 		return 2
