@@ -42,15 +42,13 @@ func realMain() int {
 	flag.Parse()
 
 	if flag.NArg() < 1 {
-		log.Printf("ERROR: you must provide a serial device")
-		return 2
+		panic(fmt.Errorf("you must provide a serial device"))
 	}
 
 	portName := flag.Arg(0)
 	port, err := serial.Open(portName, &serial.Mode{})
 	if err != nil {
-		log.Printf("ERROR: failed to open serial port %s: %v", portName, err)
-		return 1
+		panic(fmt.Errorf("failed to open serial port %s: %v", portName, err))
 	}
 	defer port.Close()
 
@@ -58,16 +56,14 @@ func realMain() int {
 
 	status, err := port.GetModemStatusBits()
 	if err != nil {
-		log.Printf("ERROR: unable to read status bits from %s", portName)
-		return 1
+		panic(fmt.Errorf("unable to read status bits from %s", portName))
 	}
 	ctsState := status.CTS
 
 	for {
 		status, err := port.GetModemStatusBits()
 		if err != nil {
-			log.Printf("ERROR: unable to read status bits from %s", portName)
-			return 1
+			panic(fmt.Errorf("unable to read status bits from %s", portName))
 		}
 
 		if status.CTS != ctsState {
@@ -85,8 +81,7 @@ func realMain() int {
 
 			if script != "" {
 				if err := runScript(script, portName, action); err != nil && !missingOkay {
-					log.Printf("ERROR: %s", err)
-					return 1
+					panic(fmt.Errorf("ERROR: %s", err))
 				}
 			}
 
@@ -98,5 +93,12 @@ func realMain() int {
 }
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("ERROR: %s", r)
+			os.Exit(1)
+		}
+	}()
+
 	os.Exit(realMain())
 }
